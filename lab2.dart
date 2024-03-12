@@ -123,13 +123,18 @@ int grupuri(int n)
 }
 
 void main(List<String> args) {
-  //largeNumber(args);
+  // print("-----1-----");
+  // largeNumber(args);
+  // //dart lab2.dart 9 9 9
+print("-----2-----");
+  cuvant(args);
+  //dart lab2.dart A 5 B 3 C 9 ABBCC
 
-  //cuvant(args);
+print("-----3-----");
+  int nr=perechi_bune([1,2,3,4,1,2,6,2,7]);
+  print("nr perechi=$nr");
 
-  // int nr=perechi_bune([1,2,3,4,1,2,6,2,7]);
-  // print("nr perechi=$nr");
-
-  int nr=grupuri(30);
-  print("nr grupuri=$nr");
+print("-----4-----");
+  int nr_1=grupuri(30);
+  print("nr grupuri=$nr_1");
 }
