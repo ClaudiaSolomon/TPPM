@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'lab4-ex4.dart';
 //1
-List<String> match_expresii_regulate(String input, List<String> expresii) {
+List<String> match_expresii_regulate(String input, List<RegExp> expresii) {
   List<String> matches = [];
 
-  for (String expresie in expresii) {
-    RegExp exp_reg = RegExp(expresie);
-    Iterable<RegExpMatch> match = exp_reg.allMatches(input);
+  for (RegExp expresie in expresii) {
+    Iterable<RegExpMatch> match = expresie.allMatches(input);
     if (match != null) {
       for(RegExpMatch m in match)
       {
@@ -46,7 +45,11 @@ class Stack {
 
   Future<String?> peek() async {
     var lines = await _file.readAsLines();
-    return lines.isNotEmpty ? lines.last : null;
+    if (lines.isNotEmpty) {
+      return lines.last;
+    } else {
+      return null;
+    }
   }
 
   bool isEmpty() {
@@ -193,11 +196,10 @@ class MathOps<T, G> {
 
 Future<void> main() async {
   print("--------------1--------------");
-  String input = "Ana are mere si pere";
-  List<String> expresii = [
-    r"Ana",
-    r"mere",
-    r"nu"
+  String input = "Ana are  2 mere si  3 pere";
+  List<RegExp> expresii = [
+    RegExp(r'\d+'),
+    RegExp(r'[A-Z]+')
   ];
 
   List<String> potriviri = match_expresii_regulate(input, expresii);
@@ -237,7 +239,7 @@ try {
     print("Eroare: $e");
   }
   try {
-    print(mathOps.mod(10, 3)); 
+    print(mathOps.mod(10, 3.0)); 
   } catch (e) {
     print("Eroare: $e");
   }
