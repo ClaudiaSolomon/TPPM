@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:torch_controller/torch_controller.dart';
 
 void main() {
+  TorchController().initialize();
   runApp(MyApp());
 }
 
@@ -12,6 +14,7 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   final TextEditingController _controller = TextEditingController();
   String _displayText = '';
+  final torchController = TorchController();
   Map<String, String> morseCodeMap = {
     'A': '.-',
     'B': '-...',
@@ -59,7 +62,9 @@ class MyAppState extends State<MyApp> {
   };
 
   void onButtonPressed() {
-    morseCode(_controller.text);
+    String code=morseCode(_controller.text);
+
+    flashlight(code);
   }
 
   @override
@@ -93,17 +98,69 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  void morseCode(String text) {
+  String morseCode(String text) {
     String result = '';
     for (int i = 0; i < text.length; i++) {
       if (text[i] == ' ') {
-        result += ' ';
+        result += '#'; //intre cuvinte se pune #
       } else {
         result += morseCodeMap[text[i].toUpperCase()]!;
+        result += ' '; //intre litere se pune spatiu
       }
     }
-    setState(() {
-      _displayText = result;
+    return result;
+    // setState(() {
+    //   _displayText = result;
+    // });
+  }
+  void flashlight(String text) async{
+    int i=0;
+    int j=0;
+    String letter='';
+    bool isOn= await torchController.toggle() as bool;
+    while(i<text.length){
+      setState(() {
+        letter+=text[i];
+      _displayText = '${_controller.text[j]}:$letter';
     });
+      if(text[i]=='.'){
+        if(isOn==false){
+          await torchController.toggle();
+          isOn=true;
+        }
+        await Future.delayed(Duration(seconds: 1));
+        await torchController.toggle();
+        await Future.delayed(Duration(seconds: 1));
+        isOn=false;
+      }
+      else if(text[i]=='-'){
+        if(isOn==false){
+          await torchController.toggle();
+          isOn=true;
+        }
+        await Future.delayed(Duration(seconds: 3));
+        await torchController.toggle();
+        await Future.delayed(Duration(seconds: 1));
+        isOn=false;
+      }
+      else if(text[i]=='#'){
+        if(isOn==true){
+          await torchController.toggle();
+          isOn=false;
+        }
+        await Future.delayed(Duration(seconds: 4));
+      }
+      else if(text[i]==' '){
+        j++;
+        letter='';
+        if(isOn==true){
+          await torchController.toggle();
+          isOn=false;
+        }
+        await Future.delayed(Duration(seconds: 2));
+      }
+      i++;
+    }
+
   }
 }
