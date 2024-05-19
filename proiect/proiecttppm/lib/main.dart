@@ -88,8 +88,15 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(title: Text("Morse Code App")), body: GetBody()));
+      home: Scaffold(
+        appBar: AppBar(title: Text("Morse Code App")),
+        body: ListView(
+          children: [
+            GetBody(),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget GetBody() {
@@ -158,12 +165,11 @@ class MyAppState extends State<MyApp> {
 
   String decryptMorseCode(String text) {
     String result = '';
-    List<String> words = text.split('#'); // Desparte textul în cuvinte
+    List<String> words = text.split('#'); // cuvinte
 
     for (String word in words) {
-      List<String> letters = word.split(' '); // Desparte cuvântul în litere
+      List<String> letters = word.split(' ');  // litere
       for (String letter in letters) {
-        // Caută cheia corespunzătoare valorii codului Morse în map
         String decodedLetter = morseCodeMap.entries
             .firstWhere(
               (entry) => entry.value == letter,
@@ -172,10 +178,10 @@ class MyAppState extends State<MyApp> {
             .key;
         result += decodedLetter;
       }
-      result += ' '; // Adaugă un spațiu între cuvinte
+      result += ' ';
     }
 
-    return result.trim(); // Elimină spațiile suplimentare de la final
+    return result.trim();
   }
 
   /*
