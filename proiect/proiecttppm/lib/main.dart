@@ -17,6 +17,8 @@ class MyAppState extends State<MyApp> {
   final torchController = TorchController();
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _recipientController = TextEditingController();
+  final TextEditingController _decryptedTextController =
+      TextEditingController();
   String code = '';
   Map<String, String> morseCodeMap = {
     'A': '.-',
@@ -69,12 +71,19 @@ class MyAppState extends State<MyApp> {
 
     flashlight(code);
   }
+
   void onSendSMSPressed() {
-      String message = code;
-      String msg = message.replaceAll("#", "\n");
-      List<String> recipients = _recipientController.text.split(',');
-      sendSMStopeople(msg, recipients);
-    }
+    String message = code;
+    // String msg = message.replaceAll("#", "\n");
+    List<String> recipients = _recipientController.text.split(',');
+    sendSMStopeople(message, recipients);
+  }
+
+  void onDecryptPressed() {
+    setState(() {
+      _displayText = decryptMorseCode(_decryptedTextController.text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +109,8 @@ class MyAppState extends State<MyApp> {
             width: 200,
             child: TextField(
               controller: _recipientController,
-              decoration: const InputDecoration(labelText: "Enter recipients here"),
+              decoration:
+                  const InputDecoration(labelText: "Enter recipients here"),
             ),
           ),
           const SizedBox(height: 20),
@@ -112,6 +122,19 @@ class MyAppState extends State<MyApp> {
           ElevatedButton(
             onPressed: onSendSMSPressed,
             child: const Text("Send SMS"),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: 200,
+            child: TextField(
+              controller: _decryptedTextController,
+              decoration: const InputDecoration(labelText: "Decrypted text"),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onDecryptPressed,
+            child: const Text("Decrypt"),
           ),
           const SizedBox(height: 20),
           Text(_displayText, style: const TextStyle(fontSize: 20)),
@@ -133,6 +156,28 @@ class MyAppState extends State<MyApp> {
     return result;
   }
 
+  String decryptMorseCode(String text) {
+    String result = '';
+    List<String> words = text.split('#'); // Desparte textul în cuvinte
+
+    for (String word in words) {
+      List<String> letters = word.split(' '); // Desparte cuvântul în litere
+      for (String letter in letters) {
+        // Caută cheia corespunzătoare valorii codului Morse în map
+        String decodedLetter = morseCodeMap.entries
+            .firstWhere(
+              (entry) => entry.value == letter,
+              orElse: () => MapEntry('', ''),
+            )
+            .key;
+        result += decodedLetter;
+      }
+      result += ' '; // Adaugă un spațiu între cuvinte
+    }
+
+    return result.trim(); // Elimină spațiile suplimentare de la final
+  }
+
   /*
   1 secunda intre fiecare . sau -
   3 secunde intre fiecare litera
@@ -147,11 +192,10 @@ class MyAppState extends State<MyApp> {
     bool isOn = await torchController.toggle() as bool;
     while (i < text.length) {
       setState(() {
-        if(text[i]!='#'&& text[i]!=' ')
-        {
+        if (text[i] != '#' && text[i] != ' ') {
           letter += text[i];
         }
-        
+
         if (_messageController.text[j] == ' ') {
           j++;
         }
