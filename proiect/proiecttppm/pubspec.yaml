@@ -10,8 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_automation: ^2.0.0
-  camera: ^0.9.4+5
   torch_controller: ^2.0.1
+  flutter_sms:
+    path: C:/Users/Claudia/OneDrive/Documente/GitHub/TPPM/proiect/flutter_sms-master/flutter_sms-master
 
 dev_dependencies:
   flutter_test:

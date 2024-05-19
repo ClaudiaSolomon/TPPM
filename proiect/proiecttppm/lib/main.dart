@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_controller/torch_controller.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 
 void main() {
   TorchController().initialize();
@@ -12,9 +13,11 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final TextEditingController _controller = TextEditingController();
   String _displayText = '';
   final torchController = TorchController();
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _recipientController = TextEditingController();
+  String code = '';
   Map<String, String> morseCodeMap = {
     'A': '.-',
     'B': '-...',
@@ -62,10 +65,16 @@ class MyAppState extends State<MyApp> {
   };
 
   void onButtonPressed() {
-    String code=morseCode(_controller.text);
+    code = morseCode(_messageController.text);
 
     flashlight(code);
   }
+  void onSendSMSPressed() {
+      String message = code;
+      String msg = message.replaceAll("#", "\n");
+      List<String> recipients = _recipientController.text.split(',');
+      sendSMStopeople(msg, recipients);
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -82,14 +91,27 @@ class MyAppState extends State<MyApp> {
           SizedBox(
             width: 200,
             child: TextField(
-              controller: _controller,
+              controller: _messageController,
               decoration: const InputDecoration(labelText: "Enter text here"),
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: 200,
+            child: TextField(
+              controller: _recipientController,
+              decoration: const InputDecoration(labelText: "Enter recipients here"),
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: onButtonPressed,
-            child: const Text("Submit"),
+            child: const Text("Convert to Morse"),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onSendSMSPressed,
+            child: const Text("Send SMS"),
           ),
           const SizedBox(height: 20),
           Text(_displayText, style: const TextStyle(fontSize: 20)),
@@ -109,58 +131,70 @@ class MyAppState extends State<MyApp> {
       }
     }
     return result;
-    // setState(() {
-    //   _displayText = result;
-    // });
   }
-  void flashlight(String text) async{
-    int i=0;
-    int j=0;
-    String letter='';
-    bool isOn= await torchController.toggle() as bool;
-    while(i<text.length){
+
+  /*
+  1 secunda intre fiecare . sau -
+  3 secunde intre fiecare litera
+  5 secunde intre fiecare cuvant
+  . 1 secunda
+  - 3 secunde
+  */
+  void flashlight(String text) async {
+    int i = 0;
+    int j = 0;
+    String letter = '';
+    bool isOn = await torchController.toggle() as bool;
+    while (i < text.length) {
       setState(() {
-        letter+=text[i];
-      _displayText = '${_controller.text[j]}:$letter';
-    });
-      if(text[i]=='.'){
-        if(isOn==false){
+        if(text[i]!='#'&& text[i]!=' ')
+        {
+          letter += text[i];
+        }
+        
+        if (_messageController.text[j] == ' ') {
+          j++;
+        }
+        _displayText = '${_messageController.text[j]}:$letter';
+      });
+      if (text[i] == '.') {
+        if (isOn == false) {
           await torchController.toggle();
-          isOn=true;
+          isOn = true;
         }
         await Future.delayed(Duration(seconds: 1));
         await torchController.toggle();
         await Future.delayed(Duration(seconds: 1));
-        isOn=false;
-      }
-      else if(text[i]=='-'){
-        if(isOn==false){
+        isOn = false;
+      } else if (text[i] == '-') {
+        if (isOn == false) {
           await torchController.toggle();
-          isOn=true;
+          isOn = true;
         }
         await Future.delayed(Duration(seconds: 3));
         await torchController.toggle();
         await Future.delayed(Duration(seconds: 1));
-        isOn=false;
-      }
-      else if(text[i]=='#'){
-        if(isOn==true){
+        isOn = false;
+      } else if (text[i] == '#') {
+        if (isOn == true) {
           await torchController.toggle();
-          isOn=false;
+          isOn = false;
         }
         await Future.delayed(Duration(seconds: 4));
-      }
-      else if(text[i]==' '){
+      } else if (text[i] == ' ') {
         j++;
-        letter='';
-        if(isOn==true){
+        letter = '';
+        if (isOn == true) {
           await torchController.toggle();
-          isOn=false;
+          isOn = false;
         }
         await Future.delayed(Duration(seconds: 2));
       }
       i++;
     }
+  }
 
+  void sendSMStopeople(String message, List<String> recipients) async {
+    await sendSMS(message: message, recipients: recipients);
   }
 }
