@@ -90,6 +90,7 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("Morse Code App")),
+        backgroundColor: Color.fromARGB(255, 231, 209, 233),
         body: ListView(
           children: [
             GetBody(),
